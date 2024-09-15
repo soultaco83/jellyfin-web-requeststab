@@ -7,20 +7,26 @@ export default class RequestsController {
         window.addEventListener('resize', () => this.adjustIframeSize()); 
     }
 
-
     initIframe() {
-        ApiClient.getServerConfiguration().then(config => {
-            const iframe = document.createElement('iframe');
-            iframe.src = config.RequestsUrl || "https://request.soultaco.club"; // Use dynamic URL
-            iframe.style.width = "100%";
-            iframe.style.height = "100%";
-            iframe.frameborder = "0";
-            iframe.allow = "fullscreen";
-            iframe.allowfullscreen = true;
-        
-            this.element.appendChild(iframe);
-            this.adjustIframeSize(); 
-        });
+        // Use ApiClient directly to get the RequestsUrl
+        ApiClient.getJSON(ApiClient.getUrl("Plugins/RequestsAddon/PublicRequestsUrl"))
+            .then(response => {
+                const iframe = document.createElement('iframe');
+                const defaultUrl = "https://www.example.com"; // Default URL if none is set
+                iframe.src = response || defaultUrl; // Use dynamic URL or default
+                iframe.style.width = "100%";
+                iframe.style.height = "100%";
+                iframe.frameborder = "0";
+                iframe.allow = "fullscreen";
+                iframe.allowfullscreen = true;
+
+                this.element.appendChild(iframe);
+                this.adjustIframeSize();
+            })
+            .catch(error => {
+                console.error('Error fetching RequestsUrl:', error);
+                // Handle the error (e.g., display a message to the user)
+            });
     }
 
     adjustIframeSize() {
@@ -32,15 +38,14 @@ export default class RequestsController {
     }
 
     onResume(options) {
-        // Implement what should happen when the tab is resumed (shown)
         console.log('Requests tab resumed with options:', options);
     }
 
     onPause() {
-        // Implement what should happen when the tab is paused (hidden)
         console.log('Requests tab paused');
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     const element = document.querySelector('#requestsTab');
     const params = {};

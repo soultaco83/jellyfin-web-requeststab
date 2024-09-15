@@ -31,8 +31,6 @@ class HomeView extends TabbedView {
             name: globalize.translate('Favorites')
         }, {
             name: globalize.translate('Requests')
-        }, {
-            name: globalize.translate('Fix?')
         }];
     }
 
@@ -54,10 +52,6 @@ class HomeView extends TabbedView {
 
             case 2:
                 depends = 'requests';
-                break;
-            
-            case 3:
-                depends = 'olivetin';
                 break;
         }
 
