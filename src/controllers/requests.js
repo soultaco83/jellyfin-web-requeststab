@@ -4,20 +4,20 @@ export default class RequestsController {
         this.element = element;
         this.params = params;
         this.initIframe();
-        window.addEventListener('resize', () => this.adjustIframeSize()); 
+        window.addEventListener('resize', () => this.adjustIframeSize());
     }
 
     initIframe() {
         // Use ApiClient directly to get the RequestsUrl
-        ApiClient.getJSON(ApiClient.getUrl("Plugins/RequestsAddon/PublicRequestsUrl"))
+        ApiClient.getJSON(ApiClient.getUrl('Plugins/RequestsAddon/PublicRequestsUrl'))
             .then(response => {
                 const iframe = document.createElement('iframe');
-                const defaultUrl = "https://www.example.com"; // Default URL if none is set
+                const defaultUrl = 'https://www.example.com'; // Default URL if none is set
                 iframe.src = response || defaultUrl; // Use dynamic URL or default
-                iframe.style.width = "100%";
-                iframe.style.height = "100%";
-                iframe.frameborder = "0";
-                iframe.allow = "fullscreen";
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.frameborder = '0';
+                iframe.allow = 'fullscreen';
                 iframe.allowfullscreen = true;
 
                 this.element.appendChild(iframe);
