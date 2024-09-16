@@ -1,0 +1,38 @@
+name: Sync with Jellyfin Web Repository
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Runs every hour, adjust as needed
+    - cron: '0 12 * * *'
+    - cron: '0 18 * * *'
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout jellyfin-web-requests repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+          token: ${{ secrets.WORKFLOW }}
+
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/jellyfin/jellyfin-web.git
+
+      - name: Fetch changes from upstream
+        run: git fetch upstream
+
+      - name: Merge upstream changes to master
+        run: |
+          git checkout master
+          git merge upstream/master
+          git push origin master
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW }}
