@@ -1,0 +1,84 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      manual_tag:
+        description: 'Manually set release tag (leave empty for auto-increment)'
+        required: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for all tags and branches
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Determine release tag
+      id: determine_tag
+      run: |
+        if [ -n "${{ github.event.inputs.manual_tag }}" ]; then
+          echo "RELEASE_TAG=${{ github.event.inputs.manual_tag }}" >> $GITHUB_ENV
+        elif [[ $GITHUB_REF == refs/tags/* ]]; then
+          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        else
+          # Get the latest tag
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          
+          # Extract major, minor, patch
+          IFS='.' read -r major minor patch <<< "${latest_tag#v}"
+          
+          # Increment patch version
+          new_patch=$((patch + 1))
+          
+          # Set the new tag
+          new_tag="v$major.$minor.$new_patch"
+          echo "RELEASE_TAG=$new_tag" >> $GITHUB_ENV
+          
+          # Create and push the new tag
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag $new_tag
+          git push origin $new_tag
+        fi
+        echo "Release tag: ${{ env.RELEASE_TAG }}"
+
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build project
+      run: npm run build:production
+      
+    - name: Zip dist folder
+      run: zip -r dist.zip dist
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW }}
+      with:
+        tag_name: ${{ env.RELEASE_TAG }}
+        release_name: Release ${{ env.RELEASE_TAG }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist.zip
+        asset_name: dist.zip
+        asset_content_type: application/zip
