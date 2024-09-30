@@ -1860,7 +1860,7 @@
     "PlaybackError.NO_MEDIA_ERROR": "Impossible de trouver une source multimédia valide à lire.",
     "PlaybackError.PLAYER_ERROR": "La lecture a échoué en raison d'une erreur fatale du lecteur.",
     "LabelTrickplayAccelEncoding": "Activer l'encodage MJPEG accéléré par le matériel",
-    "LabelTrickplayAccelEncodingHelp": "Actuellement disponible uniquement sur QSV et VAAPI, cette option n'a aucun effet sur les autres méthodes d'accélération matérielle.",
+    "LabelTrickplayAccelEncodingHelp": "Actuellement disponible uniquement avec QSV, VA-API, VideoToolbox et RKMPP, cette option n'a aucun effet sur les autres méthodes d'accélération matérielle.",
     "ErrorDeletingLyrics": "Une erreur est survenu lors de la suppression des paroles du serveur. S'il vous plaît verifier que Jellyfin peut modifier les fichier dans le dossier multimedia et réessayez.",
     "HeaderDeleteLyrics": "Suppression des paroles",
     "ConfirmDeleteLyrics": "En supprimant ces paroles vous les supprimez a la fois de votre systeme de fichier et de votre bibliothèque. Êtes vous sure de vouloir continuez ?",
@@ -1928,5 +1928,12 @@
     "HeaderUploadLyrics": "Téléverser des paroles",
     "DisableVbrAudioEncodingHelp": "Empêche le serveur d'encoder l'audio avec VBR pour ce client.",
     "EnableHi10p": "Active le profil H.264 High 10",
-    "EnableHi10pHelp": "Activer pour éviter l'encodage des vidéos H.264 10-bits. Désactiver cette option si la vidéo affiche des images vides."
+    "EnableHi10pHelp": "Activer pour éviter l'encodage des vidéos H.264 10-bits. Désactiver cette option si la vidéo affiche des images vides.",
+    "AlwaysRemuxFlacAudioFilesHelp": "Si votre navigateur refuse de lire des fichiers ou s'il calcule incorrectement l'horodatage, activer ceci en guise d'alternative.",
+    "AlwaysRemuxMp3AudioFilesHelp": "Si votre navigateur calcule incorrectement l'horodatage de certains fichiers, activer ceci en guise d'alternative.",
+    "DateModified": "Date modifiée",
+    "FallbackMaxStreamingBitrateHelp": "Le débit maximum de streaming est utilisé par défaut quand ffprobe ne peut pas déterminer le débit du flux source. Cela aide à éviter que les clients demandent un débit de transcodage excessivement élevé, ce qui pourrait mener le lecteur à échouer et surcharger l'encodeur.",
+    "LabelAlwaysRemuxFlacAudioFiles": "Toujours remultiplexer les fichiers audio FLAC",
+    "LabelAlwaysRemuxMp3AudioFiles": "Toujours remultiplexer les fichiers audio MP3",
+    "LabelAllowStreamSharing": "Autoriser le partage de flux"
 }
