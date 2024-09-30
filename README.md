@@ -30,30 +30,36 @@
 <img alt="Join our Subreddit" src="https://img.shields.io/badge/reddit-r%2Fjellyfin-%23FF5700.svg"/>
 </a>
 </p>
+
 ---
+
 To install the Webui to jellyfin via docker:
-Download and extract the latest modified web interface from Releases
-Extract the archive somewhere on your server and make note of the full path to the dist folder
-Mount the dist folder to your container as /jellyfin/jellyfin-web if using the official container, or /usr/share/jellyfin/web if using the linuxserver container. Example docker-compose snippet:
+1. Download and extract the latest modified web interface from [Releases](https://github.com/soultaco83/jellyfin-web-requeststab/releases)
+2. Extract the archive somewhere on your server and make note of the full path to the `dist` folder
+3. Mount the `dist` folder to your container as `/jellyfin/jellyfin-web` if using the official container, or `/usr/share/jellyfin/web` if using the linuxserver container. Example docker-compose snippet:
+```yaml
 services:
     jellyfin:
         ports:
             - '8096:8096'
         volumes:
             # change `:ro` to `:rw` if you are using a plugin that modifies Jellyfin's web interface from inside the container (such as Jellyscrub)
-            - '/full/path/to/extracted/dist:/jellyfin/jellyfin-web:rw'  # <== add this line if using the official container
-            - '/full/path/to/extracted/dist:/usr/share/jellyfin/web:rw' # <== add this line if using the linuxserver container
+            - '/full/path/to/extracted/dist:/jellyfin/jellyfin-web:ro'  # <== add this line if using the official container
+            - '/full/path/to/extracted/dist:/usr/share/jellyfin/web:ro' # <== add this line if using the linuxserver container
             - '/config:/config'
             - '/media:/media:ro'
         image: 'jellyfin/jellyfin:10.8.0'
-Make sure to clear the browser's cached version of the web interface before testing the skip button.
+```
 
-Instructions for Unraid users only
+### Instructions for Unraid users only
+
 In the Docker tab, click on the Jellyfin container, then click on "Edit" and enable the advanced view. Under "Extra Parameters", add one of the following:
 
-If using the jellyfin/jellyfin container: --volume /full/path/to/extracted/dist:/jellyfin/jellyfin-web:rw
-If using the linuxserver/jellyfin container: --volume /full/path/to/extracted/dist:/usr/share/jellyfin/web:rw
+* If using the `jellyfin/jellyfin` container: `--volume /full/path/to/extracted/dist:/jellyfin/jellyfin-web:ro`
+* If using the `linuxserver/jellyfin` container: `--volume /full/path/to/extracted/dist:/usr/share/jellyfin/web:ro`
+
 ---
+
 Jellyfin Web is the frontend used for most of the clients available for end users, such as desktop browsers, Android, and iOS. We welcome all contributions and pull requests! If you have a larger feature in mind please open an issue so we can discuss the implementation before you start. Translations can be improved very easily from our <a href="https://translate.jellyfin.org/projects/jellyfin/jellyfin-web">Weblate</a> instance. Look through the following graphic to see if your native language could use some work!
 
 <a href="https://translate.jellyfin.org/engage/jellyfin/?utm_source=widget">
