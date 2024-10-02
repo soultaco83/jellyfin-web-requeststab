@@ -697,7 +697,7 @@ function sortPlayerTargets(a, b) {
     return aVal.localeCompare(bVal);
 }
 
-class PlaybackManager {
+export class PlaybackManager {
     constructor() {
         const self = this;
 
