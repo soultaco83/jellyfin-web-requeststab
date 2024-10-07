@@ -12,6 +12,8 @@ on:
       release_notes:
         description: 'Custom release notes (leave empty to use previous release notes)'
         required: false
+  schedule:
+    - cron: '0 0 * * 5'  # Run at 00:00 UTC every Friday
 
 jobs:
   build-and-release:
