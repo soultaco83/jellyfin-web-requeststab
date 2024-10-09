@@ -24,6 +24,7 @@ import { MediaType } from '@jellyfin/sdk/lib/generated-client/models/media-type'
 import { MediaError } from 'types/mediaError';
 import { getMediaError } from 'utils/mediaError';
 import { toApi } from 'utils/jellyfin-apiclient/compat';
+import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models/base-item-kind.js';
 
 const UNLIMITED_ITEMS = -1;
 
@@ -2583,8 +2584,15 @@ export class PlaybackManager {
             }
 
             const apiClient = ServerConnections.getApiClient(item.ServerId);
-            const mediaSourceId = playOptions.mediaSourceId || item.Id;
-            const getMediaStreams = apiClient.getItem(apiClient.getCurrentUserId(), mediaSourceId)
+            let mediaSourceId;
+
+            const isLiveTv = [BaseItemKind.TvChannel, BaseItemKind.LiveTvChannel].includes(item.Type);
+
+            if (!isLiveTv) {
+                mediaSourceId = playOptions.mediaSourceId || item.Id;
+            }
+
+            const getMediaStreams = isLiveTv ? Promise.resolve([]) : apiClient.getItem(apiClient.getCurrentUserId(), mediaSourceId)
                 .then(fullItem => {
                     return fullItem.MediaStreams;
                 });
