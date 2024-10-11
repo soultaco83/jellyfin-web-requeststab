@@ -2,9 +2,6 @@ name: Sync with Jellyfin Web Repository
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Runs every hour, adjust as needed
-    - cron: '0 12 * * *'
-    - cron: '0 18 * * *'
     - cron: '0 0 * * *'
   workflow_dispatch:  # Allows manual triggering of the workflow
 
