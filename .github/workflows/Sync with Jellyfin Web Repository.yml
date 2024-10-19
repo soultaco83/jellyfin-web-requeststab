@@ -33,3 +33,11 @@ jobs:
           git push origin master
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW }}
+
+      - name: Discord notification
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'The workflow "Sync with Jellyfin Web Repository" has failed!'
