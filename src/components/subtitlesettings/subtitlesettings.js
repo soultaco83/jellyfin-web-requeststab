@@ -47,7 +47,7 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         settingsHelper.populateLanguages(selectSubtitleLanguage, allCultures);
 
         selectSubtitleLanguage.value = user.Configuration.SubtitleLanguagePreference || '';
-        context.querySelector('#selectSubtitlePlaybackMode').value = 'Smart';
+        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || 'Smart';
 
         context.querySelector('#selectSubtitlePlaybackMode').dispatchEvent(new CustomEvent('change', {}));
 
@@ -60,11 +60,11 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         context.querySelector('#selectFont').value = appearanceSettings.font || '';
         context.querySelector('#sliderVerticalPosition').value = appearanceSettings.verticalPosition;
 
-        context.querySelector('#selectSubtitleBurnIn').value = 'all';
+        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') || 'all';
         context.querySelector('#chkSubtitleRenderPgs').checked = appSettings.get('subtitlerenderpgs') !== 'false';
 		
         context.querySelector('#selectSubtitleBurnIn').dispatchEvent(new CustomEvent('change', {}));
-        context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = true;
+        context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = appSettings.alwaysBurnInSubtitleWhenTranscoding() !== 'false';
 
         onAppearanceFieldChange({
             target: context.querySelector('#selectTextSize')
