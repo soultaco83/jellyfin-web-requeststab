@@ -2,6 +2,17 @@
 <h3 align="center">Part of the <a href="https://jellyfin.org">Jellyfin Project</a></h3>
 
 ---
+Add's a new tab to the top of jellyfin for easily accessible request page that user is hosting via ombi/jellyseer
+<br/>
+![image](https://github.com/user-attachments/assets/c520605d-76e8-466b-940a-f32af3eba177)
+<br/>
+Simply use the plugin listed https://github.com/soultaco83/Jellyfin_requests_plugin
+<br/>
+![image](https://github.com/user-attachments/assets/6e8398f6-360c-43cb-81af-1342f9971c25)
+<br/>
+
+![image](https://github.com/user-attachments/assets/e2a594be-e8a9-4692-b79c-5f81c423acff)
+
 
 <p align="center">
 <img alt="Logo Banner" src="https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/banner-logo-solid.svg?sanitize=true"/>
