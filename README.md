@@ -2,7 +2,9 @@
 <h3 align="center">Part of the <a href="https://jellyfin.org">Jellyfin Project</a></h3>
 
 ---
-Add's a new tab to the top of jellyfin for easily accessible request page that user is hosting via ombi/jellyseer
+Add's a new tab to the top of jellyfin for easily accessible request page that user is hosting via ombi/jellyseer</br>
+</br>
+prepacked in https://hub.docker.com/r/soultaco83/jellyfin_with_request
 <br/>
 ![image](https://github.com/user-attachments/assets/c520605d-76e8-466b-940a-f32af3eba177)
 <br/>
