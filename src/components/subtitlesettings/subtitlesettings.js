@@ -81,8 +81,8 @@ function saveUser(context, user, userSettingsInstance, appearanceKey, apiClient)
     userSettingsInstance.setSubtitleAppearanceSettings(appearanceSettings, appearanceKey);
 
     user.Configuration.SubtitleLanguagePreference = context.querySelector('#selectSubtitleLanguage').value;
-    user.Configuration.SubtitleMode = context.querySelector('#selectSubtitlePlaybackMode').value;
-
+    user.Configuration.SubtitleMode = context.querySelector('#selectSubtitlePlaybackMode').value || 'Smart';
+    
     return apiClient.updateUserConfiguration(user.Id, user.Configuration);
 }
 
