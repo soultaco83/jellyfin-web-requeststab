@@ -10,5 +10,5 @@ export const getId = (type: MediaSegmentType) => `${PREFIX}__${type}`;
 
 export function getMediaSegmentAction(userSettings: UserSettings, type: MediaSegmentType): MediaSegmentAction | undefined {
     const action = userSettings.get(getId(type), false);
-    return action ? action as MediaSegmentAction : undefined;
+    return action ? action as MediaSegmentAction : MediaSegmentAction.AskToSkip;
 }
