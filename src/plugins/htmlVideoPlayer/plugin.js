@@ -2093,7 +2093,7 @@ export class HtmlVideoPlayer {
     }
 
     getAspectRatio() {
-        return this._currentAspectRatio || 'auto';
+        return this._currentAspectRatio || 'fill';
     }
 
     getSupportedAspectRatios() {
