@@ -160,17 +160,11 @@ export class UserSettings {
         if (val !== undefined) {
             return this.set('preferFmp4HlsContainer', val.toString(), false);
         }
-    
-        // Changed default behavior: disabled by default but respect user settings if explicitly set
-        const userSetting = this.get('preferFmp4HlsContainer', false);
-        if (userSetting !== null && userSetting !== undefined) {
-            return toBoolean(userSetting, false);
-        }
-        
-        // Default to false instead of checking browser compatibility
-        return false;
-    }
 
+        // Enable it by default only for the platforms that play fMP4 for sure.
+        return toBoolean(this.get('preferFmp4HlsContainer', false), browser.safari || browser.firefox || browser.chrome || browser.edgeChromium);
+    }
+    
     /**
      * Get or set 'Cinema Mode' state.
      * @param {boolean|undefined} val - Flag to enable 'Cinema Mode' or undefined.
