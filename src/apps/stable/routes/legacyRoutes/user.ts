@@ -104,5 +104,11 @@ export const LEGACY_USER_ROUTES: LegacyRoute[] = [
             controller: 'movies/moviesrecommended',
             view: 'movies/movies.html'
         }
+    }, {
+        path: 'userpluginsettings.html',
+        pageProps: {
+            controller: 'user/plugin/index',
+            view: 'user/plugins/index.html'
+        }
     }
 ];

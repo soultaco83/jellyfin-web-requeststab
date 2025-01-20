@@ -14,6 +14,11 @@ import { loadNextUp } from './sections/nextUp';
 import { loadRecentlyAdded } from './sections/recentlyAdded';
 import { loadResume } from './sections/resume';
 
+import {
+    isUserUsingHomeScreenSections,
+    loadHomeScreenSections
+} from './sections/homeScreenSections';
+
 import 'elements/emby-button/paper-icon-button-light';
 import 'elements/emby-itemscontainer/emby-itemscontainer';
 import 'elements/emby-scroller/emby-scroller';
@@ -53,6 +58,11 @@ function getAllSectionsToShow(userSettings, sectionCount) {
 }
 
 export function loadSections(elem, apiClient, user, userSettings) {
+
+    if (isUserUsingHomeScreenSections(userSettings)) {
+        return loadHomeScreenSections(elem, apiClient, user, userSettings);
+    }
+
     const userId = user.Id || apiClient.getCurrentUserId();
     return queryClient
         .fetchQuery(getUserViewsQuery(toApi(apiClient), userId))
@@ -187,4 +197,3 @@ export default {
     pause,
     resume
 };
-
