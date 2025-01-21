@@ -39,15 +39,30 @@ jobs:
         elif [[ $GITHUB_REF == refs/tags/* ]]; then
           echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         else
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Get all tags and sort them by version number
+          latest_tag=$(git tag -l "v*" | sort -V | tail -n1 || echo "v0.0.0")
           IFS='.' read -r major minor patch <<< "${latest_tag#v}"
           new_patch=$((patch + 1))
           new_tag="v$major.$minor.$new_patch"
+          
+          # Check if the new tag already exists
+          if git rev-parse "$new_tag" >/dev/null 2>&1; then
+            echo "Tag $new_tag already exists, incrementing..."
+            while git rev-parse "$new_tag" >/dev/null 2>&1; do
+              patch=$((patch + 1))
+              new_tag="v$major.$minor.$patch"
+            done
+          fi
+          
           echo "RELEASE_TAG=$new_tag" >> $GITHUB_ENV
           git config user.name github-actions
           git config user.email github-actions@github.com
           git tag $new_tag
-          git push origin $new_tag
+          git push origin $new_tag || {
+            echo "Failed to push tag $new_tag, retrying with fetch first..."
+            git fetch --tags
+            git push origin $new_tag
+          }
         fi
         echo "Release tag: ${{ env.RELEASE_TAG }}"
 
