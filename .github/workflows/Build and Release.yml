@@ -1,5 +1,4 @@
 name: Build and Release
-
 on:
   push:
     tags:
@@ -22,12 +21,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Fetch all history for all tags and branches
-    
+        fetch-depth: 0  # Fetch all history
+        persist-credentials: true  # Ensure credentials are persisted
+        clean: true  # Ensure working directory is clean
+        
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
+        cache: 'npm'  # Enable npm caching
         
     - name: Determine release tag
       id: determine_tag
@@ -48,6 +50,7 @@ jobs:
           git push origin $new_tag
         fi
         echo "Release tag: ${{ env.RELEASE_TAG }}"
+
     - name: Get previous release notes
       id: previous_release
       run: |
@@ -56,6 +59,7 @@ jobs:
         echo "PREVIOUS_NOTES<<EOF" >> $GITHUB_ENV
         echo "$prev_release" | jq -r .body >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
+
     - name: Determine release notes
       id: release_notes
       run: |
@@ -68,15 +72,25 @@ jobs:
           echo "${{ env.PREVIOUS_NOTES }}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
         fi
+
     - name: Install dependencies
-      run: npm install
-      
+      run: |
+        npm install  # Use ci instead of install for cleaner installs
+        
     - name: Build project
       run: npm run build:production
       
+    - name: Verify dist folder
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "dist folder not found!"
+          exit 1
+        fi
+        
     - name: Zip dist folder
-      run: zip -r dist.zip dist
-      
+      run: |
+        zip -r dist.zip dist
+        
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
