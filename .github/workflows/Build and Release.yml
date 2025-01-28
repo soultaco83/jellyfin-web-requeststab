@@ -20,12 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # Fetch all history
-        persist-credentials: true  # Ensure credentials are persisted
-        clean: true  # Ensure working directory is clean
-    
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
