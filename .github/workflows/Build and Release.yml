@@ -1,5 +1,4 @@
 name: Build and Release
-
 on:
   push:
     tags:
@@ -13,13 +12,18 @@ on:
         description: 'Custom release notes (leave empty to use previous release notes)'
         required: false
   schedule:
-    - cron: '0 3 * * 6'  # Run at 00:00 UTC every Friday
+    - cron: '0 3 * * 6'  # Run at 03:00 UTC every Friday
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for all tags and branches
+        
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
@@ -44,6 +48,7 @@ jobs:
           git push origin $new_tag
         fi
         echo "Release tag: ${{ env.RELEASE_TAG }}"
+
     - name: Get previous release notes
       id: previous_release
       run: |
@@ -52,6 +57,7 @@ jobs:
         echo "PREVIOUS_NOTES<<EOF" >> $GITHUB_ENV
         echo "$prev_release" | jq -r .body >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
+
     - name: Determine release notes
       id: release_notes
       run: |
@@ -64,6 +70,7 @@ jobs:
           echo "${{ env.PREVIOUS_NOTES }}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
         fi
+
     - name: Install dependencies
       run: npm install
       
