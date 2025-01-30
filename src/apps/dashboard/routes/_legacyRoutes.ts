@@ -24,20 +24,6 @@ export const LEGACY_ADMIN_ROUTES: LegacyRoute[] = [
             view: 'dashboard/networking.html'
         }
     }, {
-        path: 'devices',
-        pageProps: {
-            appType: AppType.Dashboard,
-            controller: 'dashboard/devices/devices',
-            view: 'dashboard/devices/devices.html'
-        }
-    }, {
-        path: 'devices/edit',
-        pageProps: {
-            appType: AppType.Dashboard,
-            controller: 'dashboard/devices/device',
-            view: 'dashboard/devices/device.html'
-        }
-    }, {
         path: 'libraries',
         pageProps: {
             appType: AppType.Dashboard,
