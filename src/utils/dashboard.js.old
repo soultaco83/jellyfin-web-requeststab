@@ -32,16 +32,18 @@ export async function serverAddress() {
 
     if (urls.length === 0) {
         // Otherwise use computed base URL
-        let url = window.location.origin;
-
-        if (url.startsWith('file:')) {
-            return Promise.resolve();
+        let url;
+        const index = window.location.href.toLowerCase().lastIndexOf('/web');
+        if (index != -1) {
+            url = window.location.href.substring(0, index);
+        } else {
+            // fallback to location without path
+            url = window.location.origin;
         }
 
-        // Ensure we have the correct port
-        const port = window.location.port;
-        if (port && !url.includes(`:${port}`)) {
-            url = `${url}:${port}`;
+        // Don't use bundled app URL (file:) as server URL
+        if (url.startsWith('file:')) {
+            return Promise.resolve();
         }
 
         urls.push(url);
