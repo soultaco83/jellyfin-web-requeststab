@@ -165,7 +165,6 @@ class AppSettings {
         if (val !== undefined) {
             return this.set('alwaysBurnInSubtitleWhenTranscoding', val.toString());
         }
-
         return toBoolean(this.get('alwaysBurnInSubtitleWhenTranscoding'), true);
     }
 
@@ -178,7 +177,6 @@ class AppSettings {
         if (val !== undefined) {
             return this.set('subtitlerenderpgs', val.toString());
         }
-    
         return toBoolean(this.get('subtitlerenderpgs'), true);
     }
     
@@ -192,8 +190,7 @@ class AppSettings {
         if (val !== undefined) {
             return this.set('subtitleburnin', val);
         }
-    
-        return this.get('subtitleburnin') || 'all';
+        return this.get('subtitleburnin') ?? 'ALL';
     }
 
     /**

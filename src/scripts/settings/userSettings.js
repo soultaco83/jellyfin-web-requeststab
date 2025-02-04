@@ -141,8 +141,7 @@ export class UserSettings {
         if (val !== undefined) {
             return this.set('allowedAudioChannels', val, false);
         }
-
-        return this.get('allowedAudioChannels', false) || '-1';
+        return this.get('allowedAudioChannels', false) || '2';
     }
 
     /**
@@ -154,7 +153,6 @@ export class UserSettings {
         if (val !== undefined) {
             return this.set('preferFmp4HlsContainer', val.toString(), false);
         }
-    
         return toBoolean(this.get('preferFmp4HlsContainer', false), true);
     }
 
