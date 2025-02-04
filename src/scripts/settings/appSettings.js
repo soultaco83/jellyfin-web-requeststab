@@ -190,7 +190,7 @@ class AppSettings {
         if (val !== undefined) {
             return this.set('subtitleburnin', val);
         }
-        return this.get('subtitleburnin') ?? 'ALL';
+        return this.get('subtitleburnin') ?? 'all';
     }
 
     /**

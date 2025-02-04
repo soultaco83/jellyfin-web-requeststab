@@ -63,7 +63,7 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         context.querySelector('#selectFont').value = appearanceSettings.font || '';
         context.querySelector('#sliderVerticalPosition').value = appearanceSettings.verticalPosition;
 
-        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') ?? 'ALL';
+        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') ?? 'all';
         context.querySelector('#chkSubtitleRenderPgs').checked = appSettings.get('subtitlerenderpgs') !== 'false';
 
         context.querySelector('#selectSubtitleBurnIn').dispatchEvent(new CustomEvent('change', {}));
