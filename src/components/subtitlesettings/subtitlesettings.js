@@ -48,7 +48,7 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         settingsHelper.populateLanguages(selectSubtitleLanguage, allCultures);
 
         selectSubtitleLanguage.value = user.Configuration.SubtitleLanguagePreference || '';
-        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || '';
+        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || 'Smart';
 
         context.querySelector('#selectSubtitlePlaybackMode').dispatchEvent(new CustomEvent('change', {}));
 

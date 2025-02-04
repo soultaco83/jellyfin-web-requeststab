@@ -154,9 +154,8 @@ export class UserSettings {
         if (val !== undefined) {
             return this.set('preferFmp4HlsContainer', val.toString(), false);
         }
-
-        // Enable it by default only for the platforms that play fMP4 for sure.
-        return toBoolean(this.get('preferFmp4HlsContainer', false), browser.safari || browser.firefox || browser.chrome || browser.edgeChromium);
+    
+        return toBoolean(this.get('preferFmp4HlsContainer', false), true);
     }
 
     /**
@@ -169,7 +168,7 @@ export class UserSettings {
             return this.set('enableCinemaMode', val.toString(), false);
         }
 
-        return toBoolean(this.get('enableCinemaMode', false), true);
+        return toBoolean(this.get('enableCinemaMode', false), false);
     }
 
     /**

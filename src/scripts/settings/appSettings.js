@@ -166,7 +166,34 @@ class AppSettings {
             return this.set('alwaysBurnInSubtitleWhenTranscoding', val.toString());
         }
 
-        return toBoolean(this.get('alwaysBurnInSubtitleWhenTranscoding'), false);
+        return toBoolean(this.get('alwaysBurnInSubtitleWhenTranscoding'), true);
+    }
+
+    /**
+     * Get or set subtitle render PGS state.
+     * @param {boolean|undefined} val - Flag to enable subtitle render PGS or undefined.
+     * @return {boolean} Subtitle render PGS state.
+     */
+    subtitlerenderpgs(val) {
+        if (val !== undefined) {
+            return this.set('subtitlerenderpgs', val.toString());
+        }
+    
+        return toBoolean(this.get('subtitlerenderpgs'), true);
+    }
+    
+
+    /**
+     * Get or set subtitle burn-in mode.
+     * @param {string|undefined} val - Burn-in mode ('all', 'image', 'none', or '')
+     * @return {string} Burn-in mode
+     */
+    subtitleburnin(val) {
+        if (val !== undefined) {
+            return this.set('subtitleburnin', val);
+        }
+    
+        return this.get('subtitleburnin') || 'all';
     }
 
     /**
