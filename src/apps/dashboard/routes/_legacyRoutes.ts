@@ -73,13 +73,6 @@ export const LEGACY_ADMIN_ROUTES: LegacyRoute[] = [
             view: 'dashboard/metadatanfo.html'
         }
     }, {
-        path: 'playback/resume',
-        pageProps: {
-            appType: AppType.Dashboard,
-            controller: 'dashboard/playback',
-            view: 'dashboard/playback.html'
-        }
-    }, {
         path: 'plugins/catalog',
         pageProps: {
             appType: AppType.Dashboard,
@@ -141,13 +134,6 @@ export const LEGACY_ADMIN_ROUTES: LegacyRoute[] = [
             appType: AppType.Dashboard,
             controller: 'dashboard/scheduledtasks/scheduledtasks',
             view: 'dashboard/scheduledtasks/scheduledtasks.html'
-        }
-    }, {
-        path: 'playback/streaming',
-        pageProps: {
-            appType: AppType.Dashboard,
-            view: 'dashboard/streaming.html',
-            controller: 'dashboard/streaming'
         }
     }
 ];
