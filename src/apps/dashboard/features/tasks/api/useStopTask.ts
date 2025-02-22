@@ -5,14 +5,13 @@ import { useApi } from 'hooks/useApi';
 import { queryClient } from 'utils/query/queryClient';
 import { QUERY_KEY } from './useTasks';
 
-export const useStartTask = () => {
+export const useStopTask = () => {
     const { api } = useApi();
 
     return useMutation({
         mutationFn: (params: ScheduledTasksApiStartTaskRequest) => (
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             getScheduledTasksApi(api!)
-                .startTask(params)
+                .stopTask(params)
         ),
         onSuccess: () => {
             void queryClient.invalidateQueries({
