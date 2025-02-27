@@ -50,11 +50,3 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
           args: '🚨 Merge failed in jellyfin-web-requeststab fork sync! Manual intervention required.'
-
-      - name: Send Discord notification on success
-        if: steps.sync.outcome == 'success'
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: '✅ Successfully synced jellyfin-web-requeststab fork with upstream.'
