@@ -47,8 +47,11 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
 
         settingsHelper.populateLanguages(selectSubtitleLanguage, allCultures);
 
-        selectSubtitleLanguage.value = user.Configuration.SubtitleLanguagePreference || '';
-        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || '';
+        // Set default subtitle language to English if not already set
+        selectSubtitleLanguage.value = user.Configuration.SubtitleLanguagePreference || 'eng';
+        
+        // Set default subtitle playback mode to Smart if not already set
+        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || 'Smart';
 
         context.querySelector('#selectSubtitlePlaybackMode').dispatchEvent(new CustomEvent('change', {}));
 
@@ -63,11 +66,17 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         context.querySelector('#selectFont').value = appearanceSettings.font || '';
         context.querySelector('#sliderVerticalPosition').value = appearanceSettings.verticalPosition;
 
-        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') || '';
-        context.querySelector('#chkSubtitleRenderPgs').checked = appSettings.get('subtitlerenderpgs') === 'true';
+        // Set default burn-in setting to All if not already set
+        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') || 'all';
+        
+        // Set default PGS rendering to true if not already set
+        context.querySelector('#chkSubtitleRenderPgs').checked = appSettings.get('subtitlerenderpgs') !== 'false';
 
         context.querySelector('#selectSubtitleBurnIn').dispatchEvent(new CustomEvent('change', {}));
-        context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = appSettings.alwaysBurnInSubtitleWhenTranscoding();
+        
+        // Set default always burn in subtitle when transcoding to true if not already set
+        context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = 
+            appSettings.alwaysBurnInSubtitleWhenTranscoding() !== false;
 
         onAppearanceFieldChange({
             target: context.querySelector('#selectTextSize')
@@ -77,14 +86,32 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
     });
 }
 
+// Set default values on first load if not already set
+function initializeDefaultSettings() {
+    if (appSettings.get('subtitleburnin') === undefined) {
+        appSettings.set('subtitleburnin', 'all');
+    }
+    
+    if (appSettings.get('subtitlerenderpgs') === undefined) {
+        appSettings.set('subtitlerenderpgs', 'true');
+    }
+    
+    if (appSettings.alwaysBurnInSubtitleWhenTranscoding() === undefined) {
+        appSettings.alwaysBurnInSubtitleWhenTranscoding(true);
+    }
+}
+
 function saveUser(context, user, userSettingsInstance, appearanceKey, apiClient) {
     let appearanceSettings = userSettingsInstance.getSubtitleAppearanceSettings(appearanceKey);
     appearanceSettings = Object.assign(appearanceSettings, getSubtitleAppearanceObject(context));
 
     userSettingsInstance.setSubtitleAppearanceSettings(appearanceSettings, appearanceKey);
 
-    user.Configuration.SubtitleLanguagePreference = context.querySelector('#selectSubtitleLanguage').value;
-    user.Configuration.SubtitleMode = context.querySelector('#selectSubtitlePlaybackMode').value;
+    // Always save the language preference
+    user.Configuration.SubtitleLanguagePreference = context.querySelector('#selectSubtitleLanguage').value || 'eng';
+    
+    // Always save the subtitle mode
+    user.Configuration.SubtitleMode = context.querySelector('#selectSubtitlePlaybackMode').value || 'Smart';
 
     return apiClient.updateUserConfiguration(user.Id, user.Configuration);
 }
@@ -92,7 +119,7 @@ function saveUser(context, user, userSettingsInstance, appearanceKey, apiClient)
 function save(instance, context, userId, userSettings, apiClient, enableSaveConfirmation) {
     loading.show();
 
-    appSettings.set('subtitleburnin', context.querySelector('#selectSubtitleBurnIn').value);
+    appSettings.set('subtitleburnin', context.querySelector('#selectSubtitleBurnIn').value || 'all');
     appSettings.set('subtitlerenderpgs', context.querySelector('#chkSubtitleRenderPgs').checked);
     appSettings.alwaysBurnInSubtitleWhenTranscoding(context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked);
 
@@ -245,6 +272,9 @@ function embed(options, self) {
         });
     }
 
+    // Initialize default settings when component is first loaded
+    initializeDefaultSettings();
+    
     self.loadData();
 
     if (options.autoFocus) {
@@ -255,7 +285,9 @@ function embed(options, self) {
 export class SubtitleSettings {
     constructor(options) {
         this.options = options;
-
+        // Set default appearanceKey if not provided
+        this.options.appearanceKey = this.options.appearanceKey || 'subtitles';
+        
         embed(options, this);
     }
 
@@ -272,6 +304,18 @@ export class SubtitleSettings {
         apiClient.getUser(userId).then(function (user) {
             userSettings.setUserInfo(userId, apiClient).then(function () {
                 self.dataLoaded = true;
+
+                // Set default subtitle mode to Smart if not already set
+                if (!user.Configuration.SubtitleMode) {
+                    user.Configuration.SubtitleMode = 'Smart';
+                }
+                
+                // Set default subtitle language to English if not already set
+                if (!user.Configuration.SubtitleLanguagePreference) {
+                    user.Configuration.SubtitleLanguagePreference = 'eng';
+                    // Apply the change to the server immediately
+                    apiClient.updateUserConfiguration(user.Id, user.Configuration);
+                }
 
                 const appearanceSettings = userSettings.getSubtitleAppearanceSettings(self.options.appearanceKey);
 
