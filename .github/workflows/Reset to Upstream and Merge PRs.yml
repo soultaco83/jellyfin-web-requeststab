@@ -137,7 +137,7 @@ jobs:
               echo "Fetched PR #$PR_NUMBER successfully"
               
               # Try to merge the PR
-              if git merge pr-$PR_NUMBER --no-ff -m "Merge PR #$PR_NUMBER into master"; then
+              if git merge pr-$PR_NUMBER --no-ff -m "Merge PR $PR_NUMBER into master"; then
                 echo "Merged PR #$PR_NUMBER successfully"
               else
                 echo "Merge conflict in PR #$PR_NUMBER"
