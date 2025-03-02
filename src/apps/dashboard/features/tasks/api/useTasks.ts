@@ -8,15 +8,10 @@ import { useApi } from 'hooks/useApi';
 import { QueryKey } from './queryKey';
 
 const fetchTasks = async (
-    api?: Api,
+    api: Api,
     params?: ScheduledTasksApiGetTasksRequest,
     options?: AxiosRequestConfig
 ) => {
-    if (!api) {
-        console.warn('[fetchTasks] No API instance available');
-        return;
-    }
-
     const response = await getScheduledTasksApi(api).getTasks(params, options);
 
     return response.data;
@@ -28,7 +23,7 @@ export const useTasks = (params?: ScheduledTasksApiGetTasksRequest) => {
     return useQuery({
         queryKey: [ QueryKey.Tasks ],
         queryFn: ({ signal }) =>
-            fetchTasks(api, params, { signal }),
+            fetchTasks(api!, params, { signal }),
         enabled: !!api
     });
 };
