@@ -37,7 +37,7 @@ jobs:
         elif [[ $GITHUB_REF == refs/tags/* ]]; then
           echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         else
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          latest_tag=$(git tag --sort=-committerdate | grep "^v[0-9]*\.[0-9]*\.[0-9]*$" | head -n 1 || echo "v0.0.0")
           IFS='.' read -r major minor patch <<< "${latest_tag#v}"
           new_patch=$((patch + 1))
           new_tag="v$major.$minor.$new_patch"
