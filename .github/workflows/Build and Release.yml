@@ -12,7 +12,7 @@ on:
         description: 'Custom release notes (leave empty to use previous release notes)'
         required: false
   schedule:
-    - cron: '0 8 * * 6'  # Run at 03:00 EST every Friday
+    - cron: '0 6 * * 0'  # Runs at 1am EST sunday
 
 jobs:
   build-and-release:
