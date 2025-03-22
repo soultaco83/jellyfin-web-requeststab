@@ -1,0 +1,100 @@
+name: Build and Release
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      manual_tag:
+        description: 'Manually set release tag (leave empty for auto-increment)'
+        required: false
+      release_notes:
+        description: 'Custom release notes (leave empty to use previous release notes)'
+        required: false
+  schedule:
+    - cron: '0 6 * * 0'  # Runs at 1am EST sunday
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for all tags and branches
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    - name: Determine release tag
+      id: determine_tag
+      run: |
+        if [ -n "${{ github.event.inputs.manual_tag }}" ]; then
+          echo "RELEASE_TAG=${{ github.event.inputs.manual_tag }}" >> $GITHUB_ENV
+        elif [[ $GITHUB_REF == refs/tags/* ]]; then
+          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        else
+          latest_tag=$(git tag --sort=-committerdate | grep "^v[0-9]*\.[0-9]*\.[0-9]*$" | head -n 1 || echo "v0.0.0")
+          IFS='.' read -r major minor patch <<< "${latest_tag#v}"
+          new_patch=$((patch + 1))
+          new_tag="v$major.$minor.$new_patch"
+          echo "RELEASE_TAG=$new_tag" >> $GITHUB_ENV
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag $new_tag
+          git push origin $new_tag
+        fi
+        echo "Release tag: ${{ env.RELEASE_TAG }}"
+    - name: Get previous release notes
+      id: previous_release
+      run: |
+        prev_release=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases/latest")
+        echo "PREVIOUS_NOTES<<EOF" >> $GITHUB_ENV
+        echo "$prev_release" | jq -r .body >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+    - name: Determine release notes
+      id: release_notes
+      run: |
+        if [ -n "${{ github.event.inputs.release_notes }}" ]; then
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${{ github.event.inputs.release_notes }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        else
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${{ env.PREVIOUS_NOTES }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        fi
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build project
+      run: npm run build:production
+      
+    - name: Zip dist folder
+      run: zip -r dist.zip dist
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.RELEASE_TAG }}
+        release_name: Release ${{ env.RELEASE_TAG }}
+        body: ${{ env.RELEASE_NOTES }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist.zip
+        asset_name: dist.zip
+        asset_content_type: application/zip
