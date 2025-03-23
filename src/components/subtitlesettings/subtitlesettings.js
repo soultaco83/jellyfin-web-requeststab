@@ -67,7 +67,8 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') || 'all';
         // Set default PGS subtitle rendering to true
         context.querySelector('#chkSubtitleRenderPgs').checked = appSettings.get('subtitlerenderpgs') !== 'false';
-        // Always set burn-in when transcoding to true
+        // Always set burn-in when transcoding to true by default
+        // Use !== false to ensure undefined also becomes true
         context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = appSettings.alwaysBurnInSubtitleWhenTranscoding() !== false;
 
         context.querySelector('#selectSubtitleBurnIn').dispatchEvent(new CustomEvent('change', {}));
@@ -90,7 +91,10 @@ function initializeDefaultSettings() {
         appSettings.set('subtitlerenderpgs', 'true');
     }
     
-    if (appSettings.alwaysBurnInSubtitleWhenTranscoding() === undefined) {
+    // Set alwaysBurnInSubtitleWhenTranscoding to true by default
+    // Check if it's explicitly set to false by the user
+    const currentValue = appSettings.alwaysBurnInSubtitleWhenTranscoding();
+    if (currentValue === undefined) {
         appSettings.alwaysBurnInSubtitleWhenTranscoding(true);
     }
 }
