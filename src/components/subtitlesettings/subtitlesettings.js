@@ -48,7 +48,7 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         settingsHelper.populateLanguages(selectSubtitleLanguage, allCultures);
 
         selectSubtitleLanguage.value = user.Configuration.SubtitleLanguagePreference || '';
-        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || '';
+        context.querySelector('#selectSubtitlePlaybackMode').value = user.Configuration.SubtitleMode || 'Smart';
 
         context.querySelector('#selectSubtitlePlaybackMode').dispatchEvent(new CustomEvent('change', {}));
 
@@ -63,11 +63,14 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
         context.querySelector('#selectFont').value = appearanceSettings.font || '';
         context.querySelector('#sliderVerticalPosition').value = appearanceSettings.verticalPosition;
 
-        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') || '';
-        context.querySelector('#chkSubtitleRenderPgs').checked = appSettings.get('subtitlerenderpgs') === 'true';
-
+        // Set default subtitle burn-in to 'all'
+        context.querySelector('#selectSubtitleBurnIn').value = appSettings.get('subtitleburnin') || 'all';
+        // Set default PGS subtitle rendering to true
+        context.querySelector('#chkSubtitleRenderPgs').checked = true;
+        // Always set burn-in when transcoding to true by default
+        // Use !== false to ensure undefined also becomes true
+        context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = true;
         context.querySelector('#selectSubtitleBurnIn').dispatchEvent(new CustomEvent('change', {}));
-        context.querySelector('#chkAlwaysBurnInSubtitleWhenTranscoding').checked = appSettings.alwaysBurnInSubtitleWhenTranscoding();
 
         onAppearanceFieldChange({
             target: context.querySelector('#selectTextSize')
@@ -75,6 +78,23 @@ function loadForm(context, user, userSettings, appearanceSettings, apiClient) {
 
         loading.hide();
     });
+}
+
+// Also update the initializeDefaultSettings function:
+function initializeDefaultSettings() {
+    if (appSettings.get('subtitleburnin') === undefined) {
+        appSettings.set('subtitleburnin', 'all');
+    }
+    
+    if (appSettings.get('subtitlerenderpgs') === undefined) {
+        appSettings.set('subtitlerenderpgs', 'true');
+    }
+    
+    // Set alwaysBurnInSubtitleWhenTranscoding to true by default
+    const currentValue = appSettings.alwaysBurnInSubtitleWhenTranscoding();
+    if (currentValue === undefined) {
+        appSettings.alwaysBurnInSubtitleWhenTranscoding(true);
+    }
 }
 
 function saveUser(context, user, userSettingsInstance, appearanceKey, apiClient) {
@@ -244,6 +264,9 @@ function embed(options, self) {
             }
         });
     }
+
+    // Initialize default settings before loading data
+    initializeDefaultSettings();
 
     self.loadData();
 

@@ -2,6 +2,7 @@ import Events from '../../utils/events.ts';
 import { toBoolean } from '../../utils/string.ts';
 import browser from '../browser';
 import appSettings from './appSettings';
+import { FILTER_SETTINGS } from '../../constants/filterSettings';
 
 function onSaveTimeout() {
     const self = this;
@@ -20,13 +21,6 @@ function saveServerPreferences(instance) {
 const allowedSortSettings = ['SortBy', 'SortOrder'];
 
 const filterSettingsPostfix = '-filter';
-const allowedFilterSettings = [
-    'Filters', 'HasSubtitles', 'HasTrailer', 'HasSpecialFeature',
-    'HasThemeSong', 'HasThemeVideo', 'Genres', 'OfficialRatings',
-    'Tags', 'VideoTypes', 'IsSD', 'IsHD', 'Is4K', 'Is3D',
-    'IsFavorite', 'IsMissing', 'IsUnaired', 'ParentIndexNumber',
-    'SeriesStatus', 'Years'
-];
 
 function filterQuerySettings(query, allowedItems) {
     return Object.keys(query)
@@ -152,8 +146,8 @@ export class UserSettings {
     }
 
     /**
-     * Get or set 'Prefer fMP4-HLS Container' state.
-     * @param {boolean|undefined} val - Flag to enable 'Prefer fMP4-HLS Container' or undefined.
+     * Get or set 'Perfer fMP4-HLS Container' state.
+     * @param {boolean|undefined} val - Flag to enable 'Perfer fMP4-HLS Container' or undefined.
      * @return {boolean} 'Prefer fMP4-HLS Container' state.
      */
     preferFmp4HlsContainer(val) {
@@ -162,20 +156,7 @@ export class UserSettings {
         }
 
         // Enable it by default only for the platforms that play fMP4 for sure.
-        return toBoolean(this.get('preferFmp4HlsContainer', false), browser.safari || browser.firefox || browser.chrome || browser.edgeChromium);
-    }
-
-    /**
-     * Get or set 'Limit Segment Length' state.
-     * @param {boolean|undefined} val - Flag to enable 'Limit Segment Length' or undefined.
-     * @returns {boolean} 'Limit Segment Length' state.
-     */
-    limitSegmentLength(val) {
-        if (val !== undefined) {
-            return this.set('limitSegmentLength', val.toString(), false);
-        }
-
-        return toBoolean(this.get('limitSegmentLength', false), false);
+        return toBoolean(this.get('preferFmp4HlsContainer', false), true);
     }
 
     /**
@@ -561,7 +542,7 @@ export class UserSettings {
             sortSettings = filterQuerySettings(JSON.parse(sortSettings), allowedSortSettings);
         }
         if (filterSettings) {
-            filterSettings = filterQuerySettings(JSON.parse(filterSettings), allowedFilterSettings);
+            filterSettings = filterQuerySettings(JSON.parse(filterSettings), FILTER_SETTINGS);
         }
 
         return Object.assign(query, sortSettings, filterSettings);
@@ -574,7 +555,7 @@ export class UserSettings {
      */
     saveQuerySettings(key, query) {
         const sortSettings = filterQuerySettings(query, allowedSortSettings);
-        const filterSettings = filterQuerySettings(query, allowedFilterSettings);
+        const filterSettings = filterQuerySettings(query, FILTER_SETTINGS);
 
         this.set(key, JSON.stringify(sortSettings));
         this.set(key + filterSettingsPostfix, JSON.stringify(filterSettings), false);
@@ -684,7 +665,6 @@ export const get = currentSettings.get.bind(currentSettings);
 export const serverConfig = currentSettings.serverConfig.bind(currentSettings);
 export const allowedAudioChannels = currentSettings.allowedAudioChannels.bind(currentSettings);
 export const preferFmp4HlsContainer = currentSettings.preferFmp4HlsContainer.bind(currentSettings);
-export const limitSegmentLength = currentSettings.limitSegmentLength.bind(currentSettings);
 export const enableCinemaMode = currentSettings.enableCinemaMode.bind(currentSettings);
 export const selectAudioNormalization = currentSettings.selectAudioNormalization.bind(currentSettings);
 export const enableNextVideoInfoOverlay = currentSettings.enableNextVideoInfoOverlay.bind(currentSettings);
