@@ -3,7 +3,6 @@ import escapeHTML from 'escape-html';
 
 import { MediaSegmentAction } from 'apps/stable/features/playback/constants/mediaSegmentAction';
 import { getId, getMediaSegmentAction } from 'apps/stable/features/playback/utils/mediaSegmentSettings';
-import { ServerConnections } from 'lib/jellyfin-apiclient';
 
 import appSettings from '../../scripts/settings/appSettings';
 import { appHost } from '../apphost';
@@ -13,6 +12,7 @@ import qualityoptions from '../qualityOptions';
 import globalize from '../../lib/globalize';
 import loading from '../loading/loading';
 import Events from '../../utils/events.ts';
+import ServerConnections from '../ServerConnections';
 import toast from '../toast/toast';
 import template from './playbackSettings.template.html';
 
@@ -190,11 +190,6 @@ function loadForm(context, user, userSettings, systemInfo, apiClient) {
         context.querySelector('.fldEnableHi10p').classList.remove('hide');
     }
 
-    // Show hls segment length setting for webOS only, as the setting only aims to fix an issue on that platform.
-    if (browser.web0s) {
-        context.querySelector('.fldLimitSegmentLength').classList.remove('hide');
-    }
-
     context.querySelector('#selectAllowedAudioChannels').value = userSettings.allowedAudioChannels();
 
     apiClient.getCultures().then(allCultures => {
@@ -225,7 +220,6 @@ function loadForm(context, user, userSettings, systemInfo, apiClient) {
 
     context.querySelector('.chkPlayDefaultAudioTrack').checked = user.Configuration.PlayDefaultAudioTrack || false;
     context.querySelector('.chkPreferFmp4HlsContainer').checked = userSettings.preferFmp4HlsContainer();
-    context.querySelector('.chkLimitSegmentLength').checked = userSettings.limitSegmentLength();
     context.querySelector('.chkEnableDts').checked = appSettings.enableDts();
     context.querySelector('.chkEnableTrueHd').checked = appSettings.enableTrueHd();
     context.querySelector('.chkEnableHi10p').checked = appSettings.enableHi10p();
@@ -299,7 +293,6 @@ function saveUser(context, user, userSettingsInstance, apiClient) {
     user.Configuration.PlayDefaultAudioTrack = context.querySelector('.chkPlayDefaultAudioTrack').checked;
     user.Configuration.EnableNextEpisodeAutoPlay = context.querySelector('.chkEpisodeAutoPlay').checked;
     userSettingsInstance.preferFmp4HlsContainer(context.querySelector('.chkPreferFmp4HlsContainer').checked);
-    userSettingsInstance.limitSegmentLength(context.querySelector('.chkLimitSegmentLength').checked);
     userSettingsInstance.enableCinemaMode(context.querySelector('.chkEnableCinemaMode').checked);
     userSettingsInstance.selectAudioNormalization(context.querySelector('#selectAudioNormalization').value);
     userSettingsInstance.enableNextVideoInfoOverlay(context.querySelector('.chkEnableNextVideoOverlay').checked);
