@@ -99,6 +99,7 @@
 - [Derek Huber](https://github.com/Derek4aty1)
 - [StableCrimson](https://github.com/StableCrimson)
 - [diegoeche](https://github.com/diegoeche)
+- [Mark Reading](https://github.com/markreading)
 
 ## Emby Contributors
 
