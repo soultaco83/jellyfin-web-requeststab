@@ -63,11 +63,6 @@ jobs:
             echo "Backed up requests.js"
           fi
           
-          if [ -f "src/controllers/pausescreen.js" ]; then
-            cp src/controllers/pausescreen.js /tmp/files-backup/src/controllers/
-            echo "Backed up pausescreen.js"
-          fi
-          
           if [ -f "src/controllers/home.js" ]; then
             cp src/controllers/home.js /tmp/files-backup/src/controllers/
             echo "Backed up home.js"
@@ -109,7 +104,6 @@ jobs:
             ["src/components/subtitlesettings/subtitlesettings.js"]="/tmp/files-backup/src/components/subtitlesettings/subtitlesettings.js"
             ["src/index.html"]="/tmp/files-backup/src/index.html"
             ["src/controllers/requests.js"]="/tmp/files-backup/src/controllers/requests.js"
-            ["src/controllers/pausescreen.js"]="/tmp/files-backup/src/controllers/pausescreen.js"
             ["src/controllers/home.js"]="/tmp/files-backup/src/controllers/home.js"
             ["src/controllers/home.html"]="/tmp/files-backup/src/controllers/home.html"
           )
