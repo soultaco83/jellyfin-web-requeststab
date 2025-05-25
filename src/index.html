@@ -22,6 +22,9 @@
 
     <title>Jellyfin</title>
 
+    <!-- Load pause screen script -->
+    <script defer src="pausescreen.js"></script>
+
     <style>
         .transparentDocument,
         .backgroundContainer-transparent:not(.withBackdrop) {
@@ -80,11 +83,312 @@
         [dir="rtl"] .mainDrawerHandle {
             left: 0;
         }
+
+        /* Toast Notification Styles */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notification {
+            background: #111;
+            color: #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 18px;
+            max-width: 350px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            word-break: break-word;
+            font-family: Arial, sans-serif;
+            position: relative;
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+            pointer-events: auto;
+        }
+        .notification .close-btn {
+            position: absolute;
+            top: -7px;
+            right: 1px;
+            cursor: pointer;
+            font-size: 30px;
+            color: #bbb;
+        }
+
+        /* Pause Screen Styles - Discless Version (Built-in) */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #overlay-disc {
+            position: absolute !important;  
+            top: calc(50vh - (26vw / 2)) !important;
+            right: 7% !important;
+            width: 26vw !important;
+            height: auto !important;
+            display: none !important;
+            animation: 30s linear infinite spin !important;
+            z-index: -1 !important;
+            filter: brightness(80%) !important;
+        }
+
+        #overlay-plot {
+            top: 61% !important;
+            max-width: 54% !important;
+            height: 50vh !important;
+            display: block !important;
+            right: 41vw !important;
+            position: absolute !important;
+            font-size: 21px !important;
+        }
+
+        #overlay-logo {
+            position: absolute !important;
+            max-width: 50vw !important; /* Max width is half the viewport width */
+            max-height: 23vh !important; /* Limits the height */
+            width: auto !important; /* Ensures no forced stretching */
+            height: auto !important; /* Preserves aspect ratio */
+            top: 25vh !important; /* Places it at a quarter of the viewport height */
+            left: 19vw !important; /* Centers within the left half */
+            transform: translateX(-50%) !important; /* Ensures true centering */
+            display: block !important;
+            margin-left: 12vw !important;
+            object-fit: contain !important; /* Prevents cropping/stretching */
+        }
     </style>
 </head>
 <body dir="ltr">
     <div id="reactRoot">
         <div class="splashLogo"></div>
     </div>
+
+    <!-- Manual Jellyfin Credentials Injection for Pause Screen -->
+    <script>
+    const saveJellyfinCredentials = (serverId, accessToken, userId) => {
+        const credentials = {
+            Servers: [{ Id: serverId, AccessToken: accessToken, UserId: userId }],
+        };
+
+        try {
+            localStorage.setItem("jellyfin_credentials", JSON.stringify(credentials));
+            console.log("Jellyfin credentials saved successfully.");
+        } catch (e) {
+            console.error("Error saving Jellyfin credentials", e);
+        }
+    };
+
+    // Enhanced credential injection that captures UserId as well
+    (function() {
+        // Wait for the page to fully load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Monitor for authentication events
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const result = originalFetch.apply(this, arguments);
+                
+                // Check for authentication responses
+                if (typeof args[0] === 'string' && args[0].includes('/Users/authenticatebyname')) {
+                    result.then(response => {
+                        if (response.ok) {
+                            response.clone().json().then(data => {
+                                if (data.AccessToken && data.ServerId && data.User && data.User.Id) {
+                                    saveJellyfinCredentials(data.ServerId, data.AccessToken, data.User.Id);
+                                }
+                            }).catch(() => {});
+                        }
+                    }).catch(() => {});
+                }
+                
+                return result;
+            };
+
+            // Also check existing localStorage for any existing auth data
+            const checkExistingAuth = () => {
+                try {
+                    // Check for existing Jellyfin auth data in various formats
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.toLowerCase().includes('jellyfin')) {
+                            const value = localStorage.getItem(key);
+                            try {
+                                const data = JSON.parse(value);
+                                if (data && typeof data === 'object') {
+                                    // Look for server data
+                                    if (data.Servers && Array.isArray(data.Servers) && data.Servers.length > 0) {
+                                        const server = data.Servers[0];
+                                        if (server.AccessToken && server.Id) {
+                                            // Update the credentials to ensure UserId is included
+                                            if (!server.UserId && window.ApiClient && window.ApiClient.getCurrentUserId) {
+                                                server.UserId = window.ApiClient.getCurrentUserId();
+                                            }
+                                            localStorage.setItem("jellyfin_credentials", JSON.stringify(data));
+                                            console.log("Updated existing Jellyfin credentials");
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // Skip invalid JSON
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error checking existing auth:", e);
+                }
+            };
+
+            // Check immediately and then periodically
+            checkExistingAuth();
+            setInterval(checkExistingAuth, 5000);
+        });
+    })();
+    </script>
+
+    <!-- Manual Jellyfin Credentials Injection for Pause Screen -->
+    <script>
+    const saveJellyfinCredentials = (serverId, accessToken, userId) => {
+        const credentials = {
+            Servers: [{ Id: serverId, AccessToken: accessToken, UserId: userId }],
+        };
+
+        try {
+            localStorage.setItem("jellyfin_credentials", JSON.stringify(credentials));
+            console.log("Jellyfin credentials saved successfully.");
+        } catch (e) {
+            console.error("Error saving Jellyfin credentials", e);
+        }
+    };
+
+    // Enhanced credential injection that captures UserId as well
+    (function() {
+        // Wait for the page to fully load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Monitor for authentication events
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const result = originalFetch.apply(this, arguments);
+                
+                // Check for authentication responses
+                if (typeof args[0] === 'string' && args[0].includes('/Users/authenticatebyname')) {
+                    result.then(response => {
+                        if (response.ok) {
+                            response.clone().json().then(data => {
+                                if (data.AccessToken && data.ServerId && data.User && data.User.Id) {
+                                    saveJellyfinCredentials(data.ServerId, data.AccessToken, data.User.Id);
+                                }
+                            }).catch(() => {});
+                        }
+                    }).catch(() => {});
+                }
+                
+                return result;
+            };
+
+            // Also check existing localStorage for any existing auth data
+            const checkExistingAuth = () => {
+                try {
+                    // Check for existing Jellyfin auth data in various formats
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.toLowerCase().includes('jellyfin')) {
+                            const value = localStorage.getItem(key);
+                            try {
+                                const data = JSON.parse(value);
+                                if (data && typeof data === 'object') {
+                                    // Look for server data
+                                    if (data.Servers && Array.isArray(data.Servers) && data.Servers.length > 0) {
+                                        const server = data.Servers[0];
+                                        if (server.AccessToken && server.Id) {
+                                            // Update the credentials to ensure UserId is included
+                                            if (!server.UserId && window.ApiClient && window.ApiClient.getCurrentUserId) {
+                                                server.UserId = window.ApiClient.getCurrentUserId();
+                                            }
+                                            localStorage.setItem("jellyfin_credentials", JSON.stringify(data));
+                                            console.log("Updated existing Jellyfin credentials");
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // Skip invalid JSON
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error checking existing auth:", e);
+                }
+            };
+
+            // Check immediately and then periodically
+            checkExistingAuth();
+            setInterval(checkExistingAuth, 5000);
+        });
+    })();
+    </script>
+
+    <!-- Toast Notification System -->
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.position = 'fixed';
+        container.style.top = '20px';
+        container.style.right = '15px';
+        container.style.zIndex = '9999';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.alignItems = 'flex-end';
+        container.style.pointerEvents = 'none';
+        document.body.appendChild(container);
+
+        function createNotification(message, id) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-btn';
+            closeBtn.innerHTML = '&times;';
+
+            closeBtn.onclick = () => {
+                notif.remove();
+                localStorage.setItem('notification_read_' + id, 'true');
+            };
+
+            notif.appendChild(closeBtn);
+
+            const msg = document.createElement('div');
+            msg.textContent = message;
+            notif.appendChild(msg);
+
+            container.appendChild(notif);
+
+            // Auto-hide after 50 seconds
+            setTimeout(() => {
+                if (notif.parentNode) {
+                    notif.remove();
+                    localStorage.setItem('notification_read_' + id, 'true');
+                }
+            }, 50000);
+        }
+
+        try {
+            const response = await fetch('/web/notification.txt', { cache: 'no-store' });
+            if (!response.ok) return;
+
+            const text = await response.text();
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+            lines.forEach((line, index) => {
+                const parts = line.split('|');
+                if (parts.length < 2) return;
+                const id = parts[0].trim();
+                const message = parts.slice(1).join('|').trim();
+
+                if (!localStorage.getItem('notification_read_' + id)) {
+                    setTimeout(() => createNotification(message, id), index * 300);
+                }
+            });
+        } catch (err) {
+            console.error('Notification fetch failed:', err);
+        }
+    });
+    </script>
 </body>
 </html>
