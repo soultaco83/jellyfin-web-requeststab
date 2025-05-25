@@ -52,6 +52,10 @@ jobs:
             cp src/components/subtitlesettings/subtitlesettings.js /tmp/files-backup/src/components/subtitlesettings/
             echo "Backed up subtitlesettings.js"
           fi
+          if [ -f "src/notification.txt" ]; then
+            cp src/notification.txt /tmp/files-backup/src/
+            echo "Backed up notification.txt"
+          fi
           
           if [ -f "src/index.html" ]; then
             cp src/index.html /tmp/files-backup/src/
@@ -103,6 +107,7 @@ jobs:
           declare -A files_to_restore=(
             ["src/components/subtitlesettings/subtitlesettings.js"]="/tmp/files-backup/src/components/subtitlesettings/subtitlesettings.js"
             ["src/index.html"]="/tmp/files-backup/src/index.html"
+            ["src/notification.txt"]="/tmp/files-backup/src/notification.txt"
             ["src/controllers/requests.js"]="/tmp/files-backup/src/controllers/requests.js"
             ["src/controllers/home.js"]="/tmp/files-backup/src/controllers/home.js"
             ["src/controllers/home.html"]="/tmp/files-backup/src/controllers/home.html"
