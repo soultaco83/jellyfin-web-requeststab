@@ -22,7 +22,7 @@
 
     <title>Jellyfin</title>
 
-    <!-- Load pause screen script -->
+    <!-- Load pause screen script from controllers directory -->
     <script defer src="controllers/pausescreen.js"></script>
 
     <style>
@@ -160,87 +160,6 @@
     <div id="reactRoot">
         <div class="splashLogo"></div>
     </div>
-
-    <!-- Manual Jellyfin Credentials Injection for Pause Screen -->
-    <script>
-    const saveJellyfinCredentials = (serverId, accessToken, userId) => {
-        const credentials = {
-            Servers: [{ Id: serverId, AccessToken: accessToken, UserId: userId }],
-        };
-
-        try {
-            localStorage.setItem("jellyfin_credentials", JSON.stringify(credentials));
-            console.log("Jellyfin credentials saved successfully.");
-        } catch (e) {
-            console.error("Error saving Jellyfin credentials", e);
-        }
-    };
-
-    // Enhanced credential injection that captures UserId as well
-    (function() {
-        // Wait for the page to fully load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Monitor for authentication events
-            const originalFetch = window.fetch;
-            window.fetch = function(...args) {
-                const result = originalFetch.apply(this, arguments);
-                
-                // Check for authentication responses
-                if (typeof args[0] === 'string' && args[0].includes('/Users/authenticatebyname')) {
-                    result.then(response => {
-                        if (response.ok) {
-                            response.clone().json().then(data => {
-                                if (data.AccessToken && data.ServerId && data.User && data.User.Id) {
-                                    saveJellyfinCredentials(data.ServerId, data.AccessToken, data.User.Id);
-                                }
-                            }).catch(() => {});
-                        }
-                    }).catch(() => {});
-                }
-                
-                return result;
-            };
-
-            // Also check existing localStorage for any existing auth data
-            const checkExistingAuth = () => {
-                try {
-                    // Check for existing Jellyfin auth data in various formats
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const key = localStorage.key(i);
-                        if (key && key.toLowerCase().includes('jellyfin')) {
-                            const value = localStorage.getItem(key);
-                            try {
-                                const data = JSON.parse(value);
-                                if (data && typeof data === 'object') {
-                                    // Look for server data
-                                    if (data.Servers && Array.isArray(data.Servers) && data.Servers.length > 0) {
-                                        const server = data.Servers[0];
-                                        if (server.AccessToken && server.Id) {
-                                            // Update the credentials to ensure UserId is included
-                                            if (!server.UserId && window.ApiClient && window.ApiClient.getCurrentUserId) {
-                                                server.UserId = window.ApiClient.getCurrentUserId();
-                                            }
-                                            localStorage.setItem("jellyfin_credentials", JSON.stringify(data));
-                                            console.log("Updated existing Jellyfin credentials");
-                                        }
-                                    }
-                                }
-                            } catch (e) {
-                                // Skip invalid JSON
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("Error checking existing auth:", e);
-                }
-            };
-
-            // Check immediately and then periodically
-            checkExistingAuth();
-            setInterval(checkExistingAuth, 5000);
-        });
-    })();
-    </script>
 
     <!-- Manual Jellyfin Credentials Injection for Pause Screen -->
     <script>
