@@ -1,0 +1,191 @@
+name: Reset to Upstream and Merge PRs
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Runs at midnight EST sunday
+  workflow_dispatch:
+
+# Permission for the default GITHUB_TOKEN
+permissions:
+  contents: write
+
+env:
+  # Default PR numbers to use for both scheduled and manual runs (if not specified)
+  DEFAULT_PR_NUMBERS: '4509,6346,6356,6376,6678,6735,6831,6904,6924,6928,6936,6939,6951'
+
+jobs:
+  reset-and-merge:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          # Just use the default GITHUB_TOKEN
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+      
+      - name: Backup important files
+        run: |
+          # Create backup directories
+          mkdir -p /tmp/workflows-backup
+          mkdir -p /tmp/files-backup/src/scripts/settings
+          mkdir -p /tmp/files-backup/src/components/playbackSettings
+          mkdir -p /tmp/files-backup/src/components/subtitlesettings
+          mkdir -p /tmp/files-backup/src/controllers
+          
+          # Only backup our specific workflows
+          if [ -d ".github/workflows" ]; then
+            if [ -f ".github/workflows/Reset to Upstream and Merge PRs.yml" ]; then
+              cp ".github/workflows/Reset to Upstream and Merge PRs.yml" "/tmp/workflows-backup/"
+            fi
+            if [ -f ".github/workflows/Build and Release.yml" ]; then
+              cp ".github/workflows/Build and Release.yml" "/tmp/workflows-backup/"
+            fi
+          fi
+
+          if [ -f "src/components/subtitlesettings/subtitlesettings.js" ]; then
+            cp src/components/subtitlesettings/subtitlesettings.js /tmp/files-backup/src/components/subtitlesettings/
+            echo "Backed up subtitlesettings.js"
+          fi
+          
+          if [ -f "src/index.html" ]; then
+            cp src/index.html /tmp/files-backup/src/
+            echo "Backed up index.html"
+          fi
+          
+          if [ -f "src/controllers/requests.js" ]; then
+            cp src/controllers/requests.js /tmp/files-backup/src/controllers/
+            echo "Backed up requests.js"
+          fi
+          
+          if [ -f "src/controllers/home.js" ]; then
+            cp src/controllers/home.js /tmp/files-backup/src/controllers/
+            echo "Backed up home.js"
+          fi
+          
+          if [ -f "src/controllers/home.html" ]; then
+            cp src/controllers/home.html /tmp/files-backup/src/controllers/
+            echo "Backed up home.html"
+          fi
+      
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/jellyfin/jellyfin-web.git || \
+          git remote set-url upstream https://github.com/jellyfin/jellyfin-web.git
+      
+      - name: Fetch from upstream
+        run: |
+          git fetch upstream --prune
+      
+      - name: Reset to upstream/master
+        run: |
+          git checkout master
+          git reset --hard upstream/master
+      
+      - name: Restore workflow files and changes
+        run: |
+          # Create workflows directory if it doesn't exist
+          mkdir -p .github/workflows
+          
+          # Restore only our specific workflow files
+          if [ -d "/tmp/workflows-backup" ] && [ "$(ls -A /tmp/workflows-backup)" ]; then
+            cp -r /tmp/workflows-backup/* .github/workflows/
+            git add .github/workflows
+            git commit -m "Restore our specific workflow files after reset"
+          fi
+          
+          # Create array of files to restore
+          declare -A files_to_restore=(
+            ["src/components/subtitlesettings/subtitlesettings.js"]="/tmp/files-backup/src/components/subtitlesettings/subtitlesettings.js"
+            ["src/index.html"]="/tmp/files-backup/src/index.html"
+            ["src/controllers/requests.js"]="/tmp/files-backup/src/controllers/requests.js"
+            ["src/controllers/home.js"]="/tmp/files-backup/src/controllers/home.js"
+            ["src/controllers/home.html"]="/tmp/files-backup/src/controllers/home.html"
+          )
+          
+          # Restore each file if it exists in backup
+          for dest_file in "${!files_to_restore[@]}"; do
+            source_file="${files_to_restore[$dest_file]}"
+            if [ -f "$source_file" ]; then
+              mkdir -p "$(dirname "$dest_file")"
+              cp "$source_file" "$dest_file"
+              git add "$dest_file"
+              echo "Restored $dest_file"
+            fi
+          done
+          
+          # Commit restored files if any were added
+          if [ -n "$(git diff --cached)" ]; then
+            git commit -m "Restore custom files after reset"
+          fi
+      
+      - name: Merge PRs
+        run: |
+          # Use the input PR numbers if provided, otherwise use the default PR numbers
+          PR_NUMBERS="${{ github.event.inputs.pr_numbers }}"
+          if [ -z "$PR_NUMBERS" ]; then
+            PR_NUMBERS="${{ env.DEFAULT_PR_NUMBERS }}"
+            echo "Using default PR numbers: $PR_NUMBERS"
+          else
+            echo "Using provided PR numbers: $PR_NUMBERS"
+            echo "Using provided PR numbers: $PR_NUMBERS"
+          fi
+          
+          IFS=',' read -ra PR_ARRAY <<< "$PR_NUMBERS"
+          
+          for PR_NUMBER in "${PR_ARRAY[@]}"; do
+            echo "Processing PR #$PR_NUMBER"
+            
+            # Fetch the PR branch
+            if git fetch upstream pull/$PR_NUMBER/head:pr-$PR_NUMBER; then
+              echo "Fetched PR #$PR_NUMBER successfully"
+              
+              # Try to merge the PR
+              if git merge pr-$PR_NUMBER --no-ff -m "Merge PR $PR_NUMBER into master"; then
+                echo "Merged PR #$PR_NUMBER successfully"
+              else
+                echo "Merge conflict in PR #$PR_NUMBER"
+                git merge --abort
+                echo "Warning: Skipped PR #$PR_NUMBER due to merge conflicts" >> merge_results.txt
+              fi
+            else
+              echo "Error: Failed to fetch PR #$PR_NUMBER. The PR may not exist."
+              echo "Warning: Skipped PR #$PR_NUMBER (not found)" >> merge_results.txt
+            fi
+          done
+          
+          if [ -f "merge_results.txt" ]; then
+            echo "Some PRs had issues and were skipped:"
+            cat merge_results.txt
+          fi
+      
+      - name: Remove unwanted workflow files before pushing
+        run: |
+          # Remove all workflow files except our specific ones
+          find .github/workflows -type f -not -name "Reset to Upstream and Merge PRs.yml" -not -name "Build and Release.yml" -exec rm -f {} \;
+          
+          # Check if any files were removed and commit if needed
+          if [ -n "$(git status --porcelain .github/workflows)" ]; then
+            git add .github/workflows
+            git commit -m "Remove upstream workflow files"
+          fi
+
+      - name: Push changes
+        run: |
+          git push origin master --force
+      
+      - name: Send Discord notification on failure
+        uses: Ilshidur/action-discord@master
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: |
+            ❌ Repository reset failed!
+            PRs attempted: ${{ github.event.inputs.pr_numbers || env.DEFAULT_PR_NUMBERS }}
+            See workflow logs for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
